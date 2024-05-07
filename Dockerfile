@@ -1,5 +1,5 @@
 # Define the NGINX version to use for consistency in both stages
-ARG NGINX_VERSION=1.21.6
+ARG NGINX_VERSION
 
 # First stage: Build the ngx_http_subs_filter_module, ngx_http_geoip2_module, and ModSecurity
 FROM --platform=linux/arm64/v8 alpine:latest as builder
