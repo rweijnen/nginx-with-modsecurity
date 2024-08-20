@@ -27,6 +27,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Fetch Latest NGINX Version
+        id: fetch_nginx_version
+        run: |
+          LATEST_NGINX_VERSION=$(wget -qO- http://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "Latest NGINX version: $LATEST_NGINX_VERSION"
+          echo "NGINX_VERSION=$LATEST_NGINX_VERSION" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -34,3 +41,5 @@ jobs:
           push: true
           platforms: linux/arm64
           tags: rweijnen/nginx-with-modsecurity-rpi:latest
+          build-args: |
+            NGINX_VERSION=${{ env.NGINX_VERSION }}
