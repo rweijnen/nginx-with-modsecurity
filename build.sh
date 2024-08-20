@@ -5,5 +5,6 @@ LATEST_NGINX_VERSION=$(wget -qO- http://nginx.org/en/download.html | grep -oP 'n
 
 # Print the latest version number
 echo Latest NGINX version: $LATEST_NGINX_VERSION
+echo Latest NGINX version: $LATEST_NGINX_VERSION>nginx.ver
 
-docker build . -t nginx-with-subsfilter --build-arg NGINX_VERSION=$LATEST_NGINX_VERSION
+docker build . -t nginx-with-subsfilter --build-arg NGINX_VERSION=$LATEST_NGINX_VERSION 
