@@ -45,11 +45,9 @@ jobs:
           tags: rweijnen/nginx-with-modsecurity-rpi:latest
           build-args: |
             NGINX_VERSION=${{ env.NGINX_VERSION }}
-          provenance: true
+          provenance: mode=max
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          attests: |
-            type=intoto
 
     env:
       DOCKER_BUILDKIT: 1
