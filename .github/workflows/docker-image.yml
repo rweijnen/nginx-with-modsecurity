@@ -45,7 +45,7 @@ jobs:
           tags: rweijnen/nginx-with-modsecurity-rpi:latest
           build-args: |
             NGINX_VERSION=${{ env.NGINX_VERSION }}
-          provenance: max  # Enable full provenance mode
+          provenance: true
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           attests: |
