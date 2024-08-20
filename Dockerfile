@@ -1,8 +1,8 @@
 # Define the NGINX version to use for consistency in both stages
-ARG NGINX_VERSION
+ARG NGINX_VERSION=1.21.6
 
 # First stage: Build the ngx_http_subs_filter_module, ngx_http_geoip2_module, and ModSecurity
-FROM --platform=linux/arm64/v8 alpine:latest as builder
+FROM --platform=linux/arm64/v8 alpine:latest AS builder
 
 # Install build dependencies required for building NGINX and the modules, including ModSecurity dependencies
 RUN apk add --update --no-cache \
@@ -71,6 +71,7 @@ RUN cd nginx-${NGINX_VERSION} && \
     --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
     --with-http_ssl_module \
 	--with-http_v2_module \
+    --with-http_sub_module \
     --add-dynamic-module=../ngx_http_substitutions_filter_module \
     --add-dynamic-module=../ngx_http_geoip2_module \
     --add-dynamic-module=../headers-more-nginx-module \
@@ -78,13 +79,26 @@ RUN cd nginx-${NGINX_VERSION} && \
     make && make install
 
 # Setup OWASP ModSecurity Core Rule Set
-RUN wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz && \
-    tar -xzf v3.3.0.tar.gz && \
-    mv coreruleset-3.3.0 /usr/local/coreruleset && \
+#RUN wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz && \
+#    tar -xzf v3.3.0.tar.gz && \
+#    mv coreruleset-3.3.0 /usr/local/coreruleset && \
+#    cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
+# Setup OWASP ModSecurity Core Rule Set
+RUN wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
+    grep "tarball_url" | \
+    cut -d '"' -f 4 | \
+    xargs wget -O coreruleset.tar.gz && \
+    mkdir coreruleset && \
+    tar -xzf coreruleset.tar.gz --strip-components=1 -C coreruleset && \
+    mv coreruleset /usr/local/coreruleset && \
     cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
+
 
 # Second stage: Set up the environment for our custom-compiled NGINX
 FROM --platform=linux/arm64/v8 alpine:latest
+
+# Set the label to prevent Watchtower from pulling updates
+LABEL com.centurylinklabs.watchtower.no-pull="true"
 
 # Install runtime dependencies
 RUN apk add --update --no-cache \
