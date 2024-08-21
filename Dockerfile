@@ -2,7 +2,8 @@
 ARG NGINX_VERSION=1.21.6
 
 # First stage: Build the ngx_http_subs_filter_module, ngx_http_geoip2_module, and ModSecurity
-FROM --platform=linux/arm64/v8 alpine:latest AS builder
+#FROM --platform=linux/arm64/v8 alpine:latest AS builder
+FROM alpine:latest AS builder
 
 # Install build dependencies required for building NGINX and the modules, including ModSecurity dependencies
 RUN apk add --update --no-cache \
@@ -95,10 +96,8 @@ RUN wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/lat
 
 
 # Second stage: Set up the environment for our custom-compiled NGINX
-FROM --platform=linux/arm64/v8 alpine:latest
-
-# Set the label to prevent Watchtower from pulling updates
-LABEL com.centurylinklabs.watchtower.no-pull="true"
+#FROM --platform=linux/arm64/v8 alpine:latest
+FROM alpine:latest
 
 # Install runtime dependencies
 RUN apk add --update --no-cache \
