@@ -73,6 +73,3 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: 'sbom.cyclonedx.json'
           push-to-registry: true
-          
-    env:
-      DOCKER_BUILDKIT: 1
