@@ -55,7 +55,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           build-args: |
             NGINX_VERSION=${{ env.NGINX_VERSION }}
-          provenance: mode=max
+          provenance: false
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
