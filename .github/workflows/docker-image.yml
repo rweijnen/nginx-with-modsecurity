@@ -55,8 +55,6 @@ jobs:
           build-args: |
             NGINX_VERSION=${{ env.NGINX_VERSION }}
           provenance: mode=max
-          attests: |
-            type=sbom  # Generate an SBOM
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
       - name: Generate SBOM
