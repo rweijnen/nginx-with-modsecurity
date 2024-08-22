@@ -17,7 +17,7 @@ jobs:
       attestations: write
     env:
       REGISTRY: index.docker.io
-      IMAGE_NAME: rweijnen/nginx-with-modsecurity-rpi    
+      IMAGE_NAME: rweijnen/nginx-with-modsecurity-rpi
 
     steps:
       - name: Checkout repository
@@ -49,6 +49,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch,pattern=main,alias=latest          
           
       - name: Build and push Docker image
         id: push
