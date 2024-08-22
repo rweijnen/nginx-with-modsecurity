@@ -1,4 +1,4 @@
-# nginx-with-modsecurity-rpi
+# nginx-with-modsecurity
 NGINX build with modsecurity incl OWASP rules and other nginx modules I use on Raspberry Pi 5
 
 Includes the following modules:
