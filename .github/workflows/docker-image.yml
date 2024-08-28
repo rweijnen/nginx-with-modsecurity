@@ -49,12 +49,14 @@ jobs:
         id: fetch_modsecurity_version
         run: |
           LATEST_MODSECURITY_VERSION=$(curl -s https://api.github.com/repositories/1320594/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          echo "Latest ModSecurity Release: $LATEST_MODSECURITY_VERSION" 
           echo "MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> $GITHUB_ENV
 
       - name: Fetch Latest OWASP Core Rule Set Version
         id: fetch_owasp_ruleset_version
         run: |
           LATEST_OWASP_RULESET_VERSION=$(curl -s https://api.github.com/repos/coreruleset/coreruleset/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          echo "Latest OWASP Core Ruleset Release: $LATEST_OWASP_RULESET_VERSION"
           echo "OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> $GITHUB_ENV
             
       - name: Extract metadata
