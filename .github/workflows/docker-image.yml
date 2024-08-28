@@ -44,7 +44,19 @@ jobs:
           LATEST_NGINX_VERSION=$(wget -qO- http://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
           echo "Latest NGINX version: $LATEST_NGINX_VERSION"
           echo "NGINX_VERSION=$LATEST_NGINX_VERSION" >> $GITHUB_ENV
-      
+          
+      - name: Fetch Latest ModSecurity Version
+        id: fetch_modsecurity_version
+        run: |
+          LATEST_MODSECURITY_VERSION=$(curl -s https://api.github.com/repositories/1320594/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          echo "MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> $GITHUB_ENV
+
+      - name: Fetch Latest OWASP Core Rule Set Version
+        id: fetch_owasp_ruleset_version
+        run: |
+          LATEST_OWASP_RULESET_VERSION=$(curl -s https://api.github.com/repos/coreruleset/coreruleset/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          echo "OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> $GITHUB_ENV
+            
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -78,3 +90,23 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: 'sbom.cyclonedx.json'
           push-to-registry: true
+
+      - name: Update README.md with NGINX version
+        run: |
+          # Replace NGINX version
+          sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
+   
+          # Replace ModSecurity version
+          sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
+          
+          # Replace OWASP Core Rule Set version
+          sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
+          
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update README.md with NGINX version ${{ env.NGINX_VERSION }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
