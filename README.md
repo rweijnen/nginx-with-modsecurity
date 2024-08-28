@@ -3,7 +3,7 @@ NGINX build with modsecurity incl OWASP rules and other nginx modules I use on R
 
 Versions:
 
-NGINX <!--NGINX_VERSION-->1.27.1<!--NGINX_VERSION-->
+NGINX <!--NGINX_VERSION-->x.yy.z<!--NGINX_VERSION-->
 
 Includes the following modules:
 GeoIP2
