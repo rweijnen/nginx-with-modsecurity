@@ -2,9 +2,9 @@
 NGINX build with modsecurity incl OWASP rules and other nginx modules I use on Raspberry Pi 5
 
 Versions:  
-NGINX <!--NGINX_VERSION-->x.yy.z<!--NGINX_VERSION-->  
-ModSecurity <!--MODSECURITY_VERSION-->vx.y.z<!--MODSECURITY_VERSION-->  
-OWASP RuleSet: <!--OWASP_RULESET_VERSION-->vx.y.z<!--OWASP_RULESET_VERSION-->  
+NGINX <!--NGINX_VERSION-->1.27.1<!--NGINX_VERSION-->  
+ModSecurity <!--MODSECURITY_VERSION-->v3.0.12<!--MODSECURITY_VERSION-->  
+OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.6.0<!--OWASP_RULESET_VERSION-->  
 
 Includes the following modules:
 GeoIP2
