@@ -32,7 +32,7 @@ Headers more
 
 Also changes the NGINX indentifiers which make it slightly harder to detect webserver type and version
 
-Images are on [DockerHub](https://hub.docker.com/r/rweijnen/nginx-with-modsecurity)
+Images are on [DockerHub](https://hub.docker.com/r/rweijnen/nginx-with-modsecurity) and can be pulled with `docker pull rweijnen/nginx-with-modsecurity`.
 
 Example docker-compose:
 ```version: '3.7'
