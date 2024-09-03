@@ -41,6 +41,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+
+      - name: Fetch Latest Alpine Version
+        id: fetch_alpine_version
+        run: |
+          docker pull alpine:latest
+          ALPINE_VERSION=$(docker run --rm alpine:latest cat /etc/alpine-release)
+          echo "Latest Alpine version: $ALPINE_VERSION"
+          echo "LATEST_ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
+
       - name: Fetch Latest NGINX Version
         id: fetch_nginx_version
         run: |
@@ -68,18 +77,22 @@ jobs:
           source VERSIONS.txt
           
           echo "Last used versions (from VERSIONS.txt):"
+          echo "CURRENT_ALPINE_VERSION='${CURRENT_ALPINE_VERSION}'"
           echo "CURRENT_NGINX_VERSION='${CURRENT_NGINX_VERSION}'"
           echo "CURRENT_MODSECURITY_VERSION='${CURRENT_MODSECURITY_VERSION}'"
           echo "CURRENT_OWASP_RULESET_VERSION='${CURRENT_OWASP_RULESET_VERSION}'"
           
           echo "Latest available versions:"
+          echo "LATEST_ALPINE_VERSION='${{ env.LATEST_ALPINE_VERSION }}'"
           echo "LATEST_NGINX_VERSION='${{ env.LATEST_NGINX_VERSION }}'"
           echo "LATEST_MODSECURITY_VERSION='${{ env.LATEST_MODSECURITY_VERSION }}'"
           echo "LATEST_OWASP_RULESET_VERSION='${{ env.LATEST_OWASP_RULESET_VERSION }}'"
       
           if [[ "${{ env.LATEST_NGINX_VERSION }}" == "$CURRENT_NGINX_VERSION" ]] && \
                [[ "${{ env.LATEST_MODSECURITY_VERSION }}" == "$CURRENT_MODSECURITY_VERSION" ]] && \
-               [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]]; then
+               [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]] && \
+               [[ "${{ env.LATEST_GEOIP2_VERSION }}" == "$CURRENT_GEOIP2_VERSION" ]] && \
+               [[ "${{ env.LATEST_ALPINE_VERSION }}" == "$CURRENT_ALPINE_VERSION" ]]; then
              echo "No updates found. Exiting."
              echo "needs_build=false" >> $GITHUB_ENV
           else
@@ -133,11 +146,13 @@ jobs:
         if: env.needs_build == 'true' && success() && steps.compare_versions.outcome == 'success'
         run: |
           # Update VERSIONS.txt
-          echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" > VERSIONS.txt
+          echo "CURRENT_ALPINE_VERSION=${{ env.LATEST_ALPINE_VERSION }}" > VERSIONS.txt
+          echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_MODSECURITY_VERSION=${{ env.LATEST_MODSECURITY_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
       
           # Update README.md with the new versions
+          sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->${{ env.LATEST_ALPINE_VERSION }}<!--ALPINE_VERSION-->/g" README.md
           sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.LATEST_NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
           sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.LATEST_MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
           sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.LATEST_OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
