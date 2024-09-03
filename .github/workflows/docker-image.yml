@@ -121,6 +121,7 @@ jobs:
         run: echo "sbom.cyclonedx.json" >> .gitignore
         
       - name: Attest SBOM
+        if: env.needs_build == 'true'
         uses: actions/attest-sbom@v1
         with:
           subject-name: index.docker.io/${{ env.IMAGE_NAME }}
