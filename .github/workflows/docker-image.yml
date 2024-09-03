@@ -156,12 +156,13 @@ jobs:
           # Configure Git
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git pull origin main
 
           # Add files and commit the changes
           git add VERSIONS.txt README.md
           git commit -m "Update versions and README.md: NGINX ${{ env.LATEST_NGINX_VERSION }}, ModSecurity ${{ env.LATEST_MODSECURITY_VERSION }}, OWASP CRS ${{ env.LATEST_OWASP_RULESET_VERSION }}"
 
-          git pull origin main     
           # Push the changes
           git push
         env:
