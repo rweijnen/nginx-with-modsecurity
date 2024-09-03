@@ -104,7 +104,10 @@ jobs:
           image: ${{ steps.meta.outputs.tags }}
           format: 'cyclonedx-json'
           output-file: 'sbom.cyclonedx.json'
-
+          
+      - name: Ignore SBOM file
+        run: echo "sbom.cyclonedx.json" >> .gitignore
+        
       - name: Attest SBOM
         uses: actions/attest-sbom@v1
         with:
@@ -112,33 +115,29 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: 'sbom.cyclonedx.json'
           push-to-registry: true
-      - name: Update versions file
+          
+      - name: Update versions file and README.md
         if: success() && steps.compare_versions.outcome == 'success'
         run: |
-          mv new_versions.txt VERSIONS.txt
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add VERSIONS.txt
-          git commit -m "Update versions to NGINX $LATEST_NGINX_VERSION, ModSecurity $LATEST_MODSECURITY_VERSION, OWASP CRS $LATEST_OWASP_RULESET_VERSION"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update README.md with NGINX version
-        run: |
-          # Replace NGINX version
+          # Update VERSIONS.txt
+          echo "CURRENT_NGINX_VERSION=${{ env.NGINX_VERSION }}" > VERSIONS.txt
+          echo "CURRENT_MODSECURITY_VERSION=${{ env.MODSECURITY_VERSION }}" >> VERSIONS.txt
+          echo "CURRENT_OWASP_RULESET_VERSION=${{ env.OWASP_RULESET_VERSION }}" >> VERSIONS.txt
+      
+          # Update README.md with the new versions
           sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
-   
-          # Replace ModSecurity version
           sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
-          
-          # Replace OWASP Core Rule Set version
           sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
-          
+      
+          # Configure Git
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "Update README.md with NGINX version ${{ env.NGINX_VERSION }}"
+      
+          # Add files and commit the changes
+          git add VERSIONS.txt README.md
+          git commit -m "Update versions and README.md: NGINX ${{ env.NGINX_VERSION }}, ModSecurity ${{ env.MODSECURITY_VERSION }}, OWASP CRS ${{ env.OWASP_RULESET_VERSION }}"
+      
+          # Push the changes
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
