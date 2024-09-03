@@ -78,15 +78,17 @@ jobs:
           echo "LATEST_OWASP_RULESET_VERSION='${{ env.LATEST_OWASP_RULESET_VERSION }}'"
       
           if [[ "${{ env.LATEST_NGINX_VERSION }}" == "$CURRENT_NGINX_VERSION" ]] && \
-             [[ "${{ env.LATEST_MODSECURITY_VERSION }}" == "$CURRENT_MODSECURITY_VERSION" ]] && \
-             [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]]; then
-            echo "No updates found. Exiting."
-            exit 0
-          fi
-      
-          echo "New versions found. Proceeding with the build."
+               [[ "${{ env.LATEST_MODSECURITY_VERSION }}" == "$CURRENT_MODSECURITY_VERSION" ]] && \
+               [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]]; then
+             echo "No updates found. Exiting."
+             echo "needs_build=false" >> $GITHUB_ENV
+          else
+            echo "New versions found. Proceeding with the build."
+            echo "needs_build=true" >> $GITHUB_ENV
+          fi      
 
       - name: Extract metadata
+        if: env.needs_build == 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -94,6 +96,7 @@ jobs:
           tags: latest
           
       - name: Build and push Docker image
+        if: env.needs_build == 'true'
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -106,6 +109,7 @@ jobs:
           sbom: true
           
       - name: Generate SBOM
+        if: env.needs_build == 'true'
         uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.meta.outputs.tags }}
@@ -113,6 +117,7 @@ jobs:
           output-file: 'sbom.cyclonedx.json'
           
       - name: Ignore SBOM file
+        if: env.needs_build == 'true'
         run: echo "sbom.cyclonedx.json" >> .gitignore
         
       - name: Attest SBOM
@@ -124,7 +129,7 @@ jobs:
           push-to-registry: true
           
       - name: Update versions file and README.md
-        if: success() && steps.compare_versions.outcome == 'success'
+        if: env.needs_build == 'true' && success() && steps.compare_versions.outcome == 'success'
         run: |
           # Update VERSIONS.txt
           echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" > VERSIONS.txt
@@ -148,3 +153,7 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip build and push
+        if: env.needs_build == 'false'
+        run: echo "Skipping build and push, no updates found."
