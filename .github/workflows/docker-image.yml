@@ -51,7 +51,7 @@ jobs:
       - name: Fetch Latest ModSecurity Version
         id: fetch_modsecurity_version
         run: |
-          LATEST_MODSECURITY_VERSION=$(curl -s https://api.github.com/repositories/1320594/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          LATEST_MODSECURITY_VERSION=$( curl -s https://api.github.com/repositories/1320594/releases | jq -r 'map(select(.tag_name | startswith("v3."))) | .[0].tag_name')
           echo "Latest ModSecurity Release: $LATEST_MODSECURITY_VERSION" 
           echo "LATEST_MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> $GITHUB_ENV
 
