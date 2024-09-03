@@ -79,9 +79,9 @@ jobs:
           echo "LATEST_OWASP_RULESET_VERSION='${LATEST_OWASP_RULESET_VERSION}'"
           
           # Compare versions
-            if [[ "$LATEST_NGINX_VERSION" == "$CURRENT_NGINX_VERSION" ]] && \
-              [[ "$LATEST_MODSECURITY_VERSION" == "$CURRENT_MODSECURITY_VERSION" ]] && \
-              [[ "$LATEST_OWASP_RULESET_VERSION" == "$CURRENT_OWASP_RULESET_VERSION" ]]; then
+            if [ "$LATEST_NGINX_VERSION" == "$CURRENT_NGINX_VERSION" ] && \
+              [ "$LATEST_MODSECURITY_VERSION" == "$CURRENT_MODSECURITY_VERSION" ] && \
+              [ "$LATEST_OWASP_RULESET_VERSION" == "$CURRENT_OWASP_RULESET_VERSION" ]; then
             echo "No updates found. Exiting."
             exit 0
           fi
