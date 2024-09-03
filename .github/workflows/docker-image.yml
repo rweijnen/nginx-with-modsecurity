@@ -102,7 +102,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            NGINX_VERSION=${{ env.NGINX_VERSION }}
+            NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}
           sbom: true
           
       - name: Generate SBOM
@@ -127,9 +127,9 @@ jobs:
         if: success() && steps.compare_versions.outcome == 'success'
         run: |
           # Update VERSIONS.txt
-          echo "CURRENT_NGINX_VERSION=${{ env.NGINX_VERSION }}" > VERSIONS.txt
-          echo "CURRENT_MODSECURITY_VERSION=${{ env.MODSECURITY_VERSION }}" >> VERSIONS.txt
-          echo "CURRENT_OWASP_RULESET_VERSION=${{ env.OWASP_RULESET_VERSION }}" >> VERSIONS.txt
+          echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" > VERSIONS.txt
+          echo "CURRENT_MODSECURITY_VERSION=${{ env.LATEST_MODSECURITY_VERSION }}" >> VERSIONS.txt
+          echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
       
           # Update README.md with the new versions
           sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.LATEST_NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
@@ -142,7 +142,7 @@ jobs:
       
           # Add files and commit the changes
           git add VERSIONS.txt README.md
-          git commit -m "Update versions and README.md: NGINX ${{ env.NGINX_VERSION }}, ModSecurity ${{ env.MODSECURITY_VERSION }}, OWASP CRS ${{ env.OWASP_RULESET_VERSION }}"
+          git commit -m "Update versions and README.md: NGINX ${{ env.LATEST_NGINX_VERSION }}, ModSecurity ${{ env.LATEST_MODSECURITY_VERSION }}, OWASP CRS ${{ env.LATEST_OWASP_RULESET_VERSION }}"
       
           # Push the changes
           git push
