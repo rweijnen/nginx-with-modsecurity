@@ -1,4 +1,7 @@
 # nginx-with-modsecurity
+
+[![Build and Push Docker Image](https://github.com/rweijnen/nginx-with-modsecurity-rpi/actions/workflows/docker-image.yml/badge.svg)](https://github.com/rweijnen/nginx-with-modsecurity-rpi/actions/workflows/docker-image.yml)
+
 NGINX build with modsecurity incl OWASP rules and other nginx modules I use on Raspberry Pi 5
 
 Contains:
