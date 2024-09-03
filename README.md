@@ -20,7 +20,8 @@ Contains:
 - **[Subs Filter Module](https://nginx.org/en/docs/http/ngx_http_sub_module.html)**:
   - A module that enables you to search and replace text in the response body before sending it to the client.
 
-Versions:  
+Versions:
+Alpine <!--ALPINE_VERSION-->0.0.0<!--ALPINE_VERSION-->
 NGINX <!--NGINX_VERSION-->1.27.1<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.12<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.6.0<!--OWASP_RULESET_VERSION-->  
