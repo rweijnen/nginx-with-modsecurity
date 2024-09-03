@@ -66,7 +66,13 @@ jobs:
         id: compare_versions
         run: |
           source VERSIONS.txt
-
+          
+          # Echo the variables to ensure they are sourced correctly
+          echo "Last used versions (from VERSIONS.txt):"
+          echo "CURRENT_NGINX_VERSION=$CURRENT_NGINX_VERSION"
+          echo "CURRENT_MODSECURITY_VERSION=$CURRENT_MODSECURITY_VERSION"
+          echo "CURRENT_OWASP_RULESET_VERSION=$CURRENT_OWASP_RULESET_VERSION"
+          
           # Compare versions
           if [ "$LATEST_NGINX_VERSION" = "$CURRENT_NGINX_VERSION" ] && \
              [ "$LATEST_MODSECURITY_VERSION" = "$CURRENT_MODSECURITY_VERSION" ] && \
