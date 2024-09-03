@@ -6,8 +6,11 @@ on:
     branches:
       - main
     paths-ignore:
-      - README.md      
-      
+      - README.md
+      - VERSIONS.txt  # Ignore changes to VERSIONS.txt to prevent retriggering
+  schedule:
+    - cron: '2 22 * * *'  # Runs every day at midnight UTC (adjust as necessary)
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,41 +27,49 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
+      - name: Initialize VERSIONS.txt if missing
+        run: |
+          if [ ! -f VERSIONS.txt ]; then
+            echo "CURRENT_NGINX_VERSION=0.0.0" > VERSIONS.txt
+            echo "CURRENT_MODSECURITY_VERSION=0.0.0" >> VERSIONS.txt
+            echo "CURRENT_OWASP_RULESET_VERSION=0.0.0" >> VERSIONS.txt
+          
       - name: Fetch Latest NGINX Version
         id: fetch_nginx_version
         run: |
           LATEST_NGINX_VERSION=$(wget -qO- http://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-          echo "Latest NGINX version: $LATEST_NGINX_VERSION"
           echo "NGINX_VERSION=$LATEST_NGINX_VERSION" >> $GITHUB_ENV
-          
+
       - name: Fetch Latest ModSecurity Version
         id: fetch_modsecurity_version
         run: |
           LATEST_MODSECURITY_VERSION=$(curl -s https://api.github.com/repositories/1320594/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-          echo "Latest ModSecurity Release: $LATEST_MODSECURITY_VERSION" 
           echo "MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> $GITHUB_ENV
 
       - name: Fetch Latest OWASP Core Rule Set Version
         id: fetch_owasp_ruleset_version
         run: |
           LATEST_OWASP_RULESET_VERSION=$(curl -s https://api.github.com/repos/coreruleset/coreruleset/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
-          echo "Latest OWASP Core Ruleset Release: $LATEST_OWASP_RULESET_VERSION"
           echo "OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> $GITHUB_ENV
-            
+
+      - name: Compare versions
+        id: compare_versions
+        run: |
+          source VERSIONS.txt
+
+          # Compare versions
+          if [ "$LATEST_NGINX_VERSION" = "$CURRENT_NGINX_VERSION" ] && \
+             [ "$LATEST_MODSECURITY_VERSION" = "$CURRENT_MODSECURITY_VERSION" ] && \
+             [ "$LATEST_OWASP_RULESET_VERSION" = "$CURRENT_OWASP_RULESET_VERSION" ]; then
+            echo "No updates found. Exiting."
+            exit 0
+          fi
+
+          echo "New versions found. Proceeding with the build."
+          echo "CURRENT_NGINX_VERSION=$LATEST_NGINX_VERSION" > new_versions.txt
+          echo "CURRENT_MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> new_versions.txt
+          echo "CURRENT_OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> new_versions.txt
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -76,6 +87,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             NGINX_VERSION=${{ env.NGINX_VERSION }}
+            MODSECURITY_VERSION=${{ env.MODSECURITY_VERSION }}
+            OWASP_RULESET_VERSION=${{ env.OWASP_RULESET_VERSION }}
           sbom: true
           
       - name: Generate SBOM
@@ -92,6 +105,18 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: 'sbom.cyclonedx.json'
           push-to-registry: true
+
+      - name: Update versions file
+        if: success() && steps.compare_versions.outcome == 'success'
+        run: |
+          mv new_versions.txt VERSIONS.txt
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add VERSIONS.txt
+          git commit -m "Update versions to NGINX $LATEST_NGINX_VERSION, ModSecurity $LATEST_MODSECURITY_VERSION, OWASP CRS $LATEST_OWASP_RULESET_VERSION"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update README.md with NGINX version
         run: |
@@ -111,4 +136,3 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
