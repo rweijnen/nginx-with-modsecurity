@@ -3,7 +3,7 @@
 [![Build and Push Docker Image](https://github.com/rweijnen/nginx-with-modsecurity-rpi/actions/workflows/docker-image.yml/badge.svg)](https://github.com/rweijnen/nginx-with-modsecurity-rpi/actions/workflows/docker-image.yml)
 
 NGINX build with modsecurity incl OWASP rules and other nginx modules I use.
-I originally made this for my Raspberry Pi 5 but I've added an AMD64 on request.
+I originally made this for my Raspberry Pi 5 but I've added an AMD64 build on request.
 
 The workflow runs every day and checks for new releases of NGINX, ModSecurity or the OWASP RuleSet and automatically builds a new image if a newer version is available.
 Updated images are of course pushed to Docker Hub.
