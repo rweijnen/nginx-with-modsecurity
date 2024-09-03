@@ -67,29 +67,25 @@ jobs:
         run: |
           source VERSIONS.txt
           
-          # Echo the variables to ensure they are sourced correctly
           echo "Last used versions (from VERSIONS.txt):"
-          echo "CURRENT_NGINX_VERSION=$CURRENT_NGINX_VERSION"
-          echo "CURRENT_MODSECURITY_VERSION=$CURRENT_MODSECURITY_VERSION"
-          echo "CURRENT_OWASP_RULESET_VERSION=$CURRENT_OWASP_RULESET_VERSION"
-
-          echo "Latest available versions:"
-          echo "LATEST_NGINX_VERSION='${LATEST_NGINX_VERSION}'"
-          echo "LATEST_MODSECURITY_VERSION='${LATEST_MODSECURITY_VERSION}'"
-          echo "LATEST_OWASP_RULESET_VERSION='${LATEST_OWASP_RULESET_VERSION}'"
+          echo "CURRENT_NGINX_VERSION='${CURRENT_NGINX_VERSION}'"
+          echo "CURRENT_MODSECURITY_VERSION='${CURRENT_MODSECURITY_VERSION}'"
+          echo "CURRENT_OWASP_RULESET_VERSION='${CURRENT_OWASP_RULESET_VERSION}'"
           
-          # Compare versions
-            if [ "$LATEST_NGINX_VERSION" == "$CURRENT_NGINX_VERSION" ] && \
-              [ "$LATEST_MODSECURITY_VERSION" == "$CURRENT_MODSECURITY_VERSION" ] && \
-              [ "$LATEST_OWASP_RULESET_VERSION" == "$CURRENT_OWASP_RULESET_VERSION" ]; then
+          echo "Latest available versions:"
+          echo "LATEST_NGINX_VERSION='${{ env.LATEST_NGINX_VERSION }}'"
+          echo "LATEST_MODSECURITY_VERSION='${{ env.LATEST_MODSECURITY_VERSION }}'"
+          echo "LATEST_OWASP_RULESET_VERSION='${{ env.LATEST_OWASP_RULESET_VERSION }}'"
+      
+          if [[ "${{ env.LATEST_NGINX_VERSION }}" == "$CURRENT_NGINX_VERSION" ]] && \
+             [[ "${{ env.LATEST_MODSECURITY_VERSION }}" == "$CURRENT_MODSECURITY_VERSION" ]] && \
+             [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]]; then
             echo "No updates found. Exiting."
             exit 0
           fi
-
+      
           echo "New versions found. Proceeding with the build."
-          echo "CURRENT_NGINX_VERSION=$LATEST_NGINX_VERSION" > new_versions.txt
-          echo "CURRENT_MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> new_versions.txt
-          echo "CURRENT_OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> new_versions.txt
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
