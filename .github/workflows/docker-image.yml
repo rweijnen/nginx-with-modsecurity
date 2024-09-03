@@ -33,6 +33,7 @@ jobs:
             echo "CURRENT_NGINX_VERSION=0.0.0" > VERSIONS.txt
             echo "CURRENT_MODSECURITY_VERSION=0.0.0" >> VERSIONS.txt
             echo "CURRENT_OWASP_RULESET_VERSION=0.0.0" >> VERSIONS.txt
+          fi
           
       - name: Fetch Latest NGINX Version
         id: fetch_nginx_version
