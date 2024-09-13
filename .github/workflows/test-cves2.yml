@@ -25,20 +25,16 @@ jobs:
         run: |
           docker pull ${{ vars.IMAGE_NAME }}:latest
 
-      - name: Run Docker Scout action
-        id: scout_scan
+      - name: Analyze for critical and high CVEs with Docker Scout
+        id: docker-scout-cves
         uses: docker/scout-action@v1
         with:
           image: ${{ vars.IMAGE_NAME }}:latest
           command: cves
-          output: full
+          sarif-file: sarif.output.json  # Generate SARIF file for the scan result
           summary: true
 
-      - name: Check for vulnerabilities in the output log
-        run: |
-          # Use the GitHub Actions log itself for checking vulnerabilities
-          if grep -q "No vulnerable packages detected" <<< "${{ steps.scout_scan.outputs.stdout }}"; then
-            echo "No vulnerabilities found in the image ${{ vars.IMAGE_NAME }}:latest."
-          else
-            echo "Vulnerabilities found in the image ${{ vars.IMAGE_NAME }}:latest."
-          fi
+      - name: Upload SARIF result to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: sarif.output.json
