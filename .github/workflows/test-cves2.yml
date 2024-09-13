@@ -25,20 +25,11 @@ jobs:
         run: |
           docker pull ${{ vars.IMAGE_NAME }}:latest
 
-      - name: Scan image with Docker Scout and show all CVEs
+      - name: Scan image with Docker Scout and capture log output
         id: scout_scan
-        uses: docker/scout-action@v1
-        with:
-          image: ${{ vars.IMAGE_NAME }}:latest
-          command: cves
-          output: full
-          summary: true
-          write-comment: true
-        continue-on-error: true  # Capture output even if there are vulnerabilities
-
-      - name: Capture Docker Scout output
         run: |
-          docker scout cves ${{ vars.IMAGE_NAME }}:latest > scout_output.txt
+          # Run Docker Scout Action and capture the output into a file
+          docker/scout-action@v1 --image ${{ vars.IMAGE_NAME }}:latest --command cves --output full --summary true > scout_output.txt 2>&1
 
       - name: Check for vulnerabilities in the scan output
         run: |
