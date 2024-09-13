@@ -29,4 +29,7 @@ jobs:
         uses: docker/scout-action@v1
         with:
           image: ${{ vars.IMAGE_NAME }}:latest
-          output: full  # Ensures all details, including all CVEs, are displayed in the logs
+          command: cves  # Specify the scan type (in this case, cves for vulnerability scanning)
+          output: full    # Full output to show all details
+          summary: true   # Include a summary in the output
+          format: json    # Optional: Format the output as JSON
