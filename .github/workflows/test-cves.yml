@@ -26,7 +26,7 @@ jobs:
           docker pull ${{ vars.IMAGE_NAME }}:latest
 
       - name: Scan image with Docker Scout and show all CVEs
-        id: scout_scan  # Add an ID to the step for later reference
+        id: scout_scan  # Add an ID to reference this step
         uses: docker/scout-action@v1
         with:
           image: ${{ vars.IMAGE_NAME }}:latest
@@ -34,12 +34,14 @@ jobs:
           output: full    # Full output to show all details
           summary: true   # Include a summary in the output
           format: json    # Format the output as JSON
-          
-      - name: Save scan results as artifact
+          write-comment: true   # Post the results as a comment in the PR (optional)
+      
+      - name: Save scan results as JSON
+        run: |
+          echo '${{ steps.scout_scan.outputs.result }}' > docker-scout-results.json
+
+      - name: Upload scan results as artifact
         uses: actions/upload-artifact@v3
         with:
           name: docker-scout-scan-results
           path: docker-scout-results.json
-        run: |
-          # Create JSON output file
-          echo '${{ steps.scout_scan.outputs.result }}' > docker-scout-results.json
