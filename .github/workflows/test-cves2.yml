@@ -44,7 +44,7 @@ jobs:
           sarif_file: sarif.output.json
 
       - name: Upload SARIF file as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated to v4 to avoid deprecation
         with:
           name: docker-scout-sarif
           path: sarif.output.json  # Upload SARIF file as an artifact for download
