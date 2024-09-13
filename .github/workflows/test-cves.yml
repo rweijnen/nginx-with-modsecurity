@@ -34,7 +34,7 @@ jobs:
           output: full    # Full output to show all details
           summary: true   # Include a summary in the output
           format: json    # Format the output as JSON
-          write-comment: true   # Post the results as a comment in the PR (optional)
+          write-comment: false   # Post the results as a comment in the PR (optional)
       
       - name: Save scan results as JSON
         run: |
