@@ -39,6 +39,12 @@ jobs:
           summary: true
 
       - name: Upload SARIF result to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3  # Note: Update to v3 as v2 is deprecated
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: sarif.output.json
+
+      - name: Upload SARIF file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-scout-sarif
+          path: sarif.output.json  # Upload SARIF file as an artifact for download
