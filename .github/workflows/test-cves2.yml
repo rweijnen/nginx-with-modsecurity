@@ -25,7 +25,7 @@ jobs:
         run: |
           docker pull ${{ vars.IMAGE_NAME }}:latest
 
-      - name: Run Docker Scout scan
+      - name: Run Docker Scout action
         id: scout_scan
         uses: docker/scout-action@v1
         with:
@@ -34,14 +34,10 @@ jobs:
           output: full
           summary: true
 
-      - name: Capture Docker Scout log output
+      - name: Check for vulnerabilities in the output log
         run: |
-          # Save the GitHub Actions logs for this job to a file
-          echo "${{ steps.scout_scan.outputs.result }}" > scout_output.txt
-          
-      - name: Check for vulnerabilities in the scan output
-        run: |
-          if grep -q "No vulnerable packages detected" scout_output.txt; then
+          # Use the GitHub Actions log itself for checking vulnerabilities
+          if grep -q "No vulnerable packages detected" <<< "${{ steps.scout_scan.outputs.stdout }}"; then
             echo "No vulnerabilities found in the image ${{ vars.IMAGE_NAME }}:latest."
           else
             echo "Vulnerabilities found in the image ${{ vars.IMAGE_NAME }}:latest."
