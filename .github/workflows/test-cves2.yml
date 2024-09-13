@@ -1,0 +1,46 @@
+name: Docker Scout Vulnerability Scan
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    environment: DEFAULT  # Use the DEFAULT environment where IMAGE_NAME is stored
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull Docker image
+        run: |
+          docker pull ${{ vars.IMAGE_NAME }}:latest
+
+      - name: Scan image with Docker Scout and show all CVEs
+        id: scout_scan  # Add an ID to reference this step
+        uses: docker/scout-action@v1
+        with:
+          image: ${{ vars.IMAGE_NAME }}:latest
+          command: cves  # Specify the scan type (vulnerability scanning)
+          output: full    # Full output to show all details
+          summary: true   # Include a summary in the output
+          format: json    # Format the output as JSON
+          write-comment: true   # Post the results as a comment in the PR (optional)
+
+      - name: Check for vulnerabilities and output result
+        run: |
+          VULN_COUNT=$(echo "${{ steps.scout_scan.outputs.result }}" | jq '.vulnerabilities.total')
+          if [[ $VULN_COUNT -eq 0 ]]; then
+            echo "No vulnerabilities found in the image."
+          else
+            echo "Vulnerabilities found: $VULN_COUNT."
+          fi
