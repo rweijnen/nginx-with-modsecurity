@@ -22,7 +22,7 @@ jobs:
       attestations: write
     env:
       REGISTRY: index.docker.io
-      IMAGE_NAME: rweijnen/nginx-with-modsecurity
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
 
     steps:
       - name: Checkout repository
