@@ -20,6 +20,7 @@ jobs:
       packages: write
       contents: write
       attestations: write
+    environment: DEFAULT     
     env:
       REGISTRY: index.docker.io
       IMAGE_NAME: ${{ vars.IMAGE_NAME }}
