@@ -171,7 +171,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Replace Docker Hub Description Versions with Latest Available
-        if: env.needs_build == 'true' && success()
+        #if: env.needs_build == 'true' && success()
         run: |
           # Replace placeholders in docker-hub-description.md with the latest available versions
           sed -i "s/<!--BUILD_DATE-->.*<!--BUILD_DATE-->/<!--BUILD_DATE-->$(date +'%Y-%m-%d')<!--BUILD_DATE-->/g" docker-hub-description.md
