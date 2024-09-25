@@ -181,7 +181,7 @@ jobs:
           sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.LATEST_OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" docker-hub-description.md
       
       - name: Update Docker Hub Description
-        if: env.needs_build == 'true' && success()
+        #if: env.needs_build == 'true' && success()
         uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
