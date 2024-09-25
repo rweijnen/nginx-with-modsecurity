@@ -19,18 +19,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Update Docker Hub README
+      - name: Replace Version Placeholders
         run: |
           # Ensure the file docker-hub-description.md exists
           if [[ ! -f docker-hub-description.md ]]; then
             echo "Error: docker-hub-description.md not found!"
             exit 1
           fi
+          
+          # Replace placeholders with actual version values
+          sed -i "s/<!--BUILD_DATE-->.*<!--BUILD_DATE-->/<!--BUILD_DATE-->$(date +'%Y-%m-%d')<!--BUILD_DATE-->/g" docker-hub-description.md
+          sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->3.15.0<!--ALPINE_VERSION-->/g" docker-hub-description.md
+          sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->1.21.6<!--NGINX_VERSION-->/g" docker-hub-description.md
+          sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->v3.0.5<!--MODSECURITY_VERSION-->/g" docker-hub-description.md
+          sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->v3.3.2<!--OWASP_RULESET_VERSION-->/g" docker-hub-description.md
 
-          # Display the content for confirmation
-          echo "Using the following content from docker-hub-description.md to update Docker Hub description:"
+          echo "Updated content with version information:"
           cat docker-hub-description.md
 
+      - name: Update Docker Hub README
+        run: |
           # Update Docker Hub description using the content of docker-hub-description.md
           curl -s -X PATCH -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" \
             -H "Content-Type: application/json" \
