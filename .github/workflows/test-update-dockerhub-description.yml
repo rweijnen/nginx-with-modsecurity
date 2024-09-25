@@ -31,7 +31,7 @@ jobs:
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ env.IMAGE_NAME }}  # Use the environment variable for the image name
           readme-filepath: docker-hub-description.md  # Path to your description file
