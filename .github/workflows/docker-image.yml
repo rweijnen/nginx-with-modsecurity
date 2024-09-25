@@ -6,7 +6,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - README.md      
+      - README.md
+      - docker-hub-description.md
       - VERSIONS.txt
       - .github/workflows/test*.yml
   schedule:
