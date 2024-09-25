@@ -1,11 +1,14 @@
-name: Test Docker Hub Description Update
-
+name: Update Docker Hub Description
 on:
   workflow_dispatch:
 
 jobs:
   update-dockerhub-description:
     runs-on: ubuntu-latest
+    environment: DEFAULT
+    env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}  # Set the IMAGE_NAME environment variable using your GitHub variable
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,32 +18,23 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          
-      - name: Fetch Current Docker Hub README
-        run: |
-          echo "Fetching current Docker Hub README"
-          curl -s -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" \
-            "https://hub.docker.com/v2/repositories/${{ vars.IMAGE_NAME }}/" | jq -r '.full_description' > dockerhub_readme.md
-          echo "Current Docker Hub README fetched:"
-          cat dockerhub_readme.md
-
-      - name: Update Docker Hub README versions
-        run: |
-          # Replace placeholders with test versions
-          sed -i "s/<!--BUILD_DATE-->.*<!--BUILD_DATE-->/<!--BUILD_DATE-->$(date +'%Y-%m-%d')<!--BUILD_DATE-->/g" dockerhub_readme.md
-          sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->3.15.0<!--ALPINE_VERSION-->/g" dockerhub_readme.md
-          sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->1.21.6<!--NGINX_VERSION-->/g" dockerhub_readme.md
-          sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->v3.0.5<!--MODSECURITY_VERSION-->/g" dockerhub_readme.md
-          sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->v3.3.2<!--OWASP_RULESET_VERSION-->/g" dockerhub_readme.md
-
-          echo "Updated Docker Hub README:"
-          cat dockerhub_readme.md
 
       - name: Update Docker Hub README
         run: |
-          echo "Updating Docker Hub README"
+          # Ensure the file docker-hub-description.md exists
+          if [[ ! -f docker-hub-description.md ]]; then
+            echo "Error: docker-hub-description.md not found!"
+            exit 1
+          fi
+
+          # Display the content for confirmation
+          echo "Using the following content from docker-hub-description.md to update Docker Hub description:"
+          cat docker-hub-description.md
+
+          # Update Docker Hub description using the content of docker-hub-description.md
           curl -s -X PATCH -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}" \
             -H "Content-Type: application/json" \
-            -d "{\"full_description\": \"$(jq -Rs . < dockerhub_readme.md)\"}" \
-            "https://hub.docker.com/v2/repositories/${{ vars.IMAGE_NAME }}/"
-          echo "Docker Hub README updated successfully."
+            -d "{\"full_description\": \"$(jq -Rs . < docker-hub-description.md)\"}" \
+            "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/"
+          
+          echo "Docker Hub README updated successfully with content from docker-hub-description.md."
