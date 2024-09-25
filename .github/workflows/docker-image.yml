@@ -10,8 +10,8 @@ on:
       - docker-hub-description.md
       - VERSIONS.txt
       - .github/workflows/test*.yml
-  schedule:
-    - cron: '2 22 * * *'  # Runs every day at midnight UTC (adjust as necessary)
+  #3schedule:
+  #  - cron: '2 22 * * *'  # Runs every day at midnight UTC (adjust as necessary)
       
 jobs:
   build:
