@@ -100,8 +100,21 @@ jobs:
           else
             echo "New versions found. Proceeding with the build."
             echo "needs_build=true" >> $GITHUB_ENV
-          fi      
-
+          fi
+          
+      - name: Check for Security Vulnerabilities
+        id: check_security
+        run: |
+          ALERT_COUNT=$(gh api repos/${{ github.repository }}/code-scanning/alerts --jq length)
+          if [ "$ALERT_COUNT" -gt 0 ]; then
+            echo "Security vulnerabilities found: $ALERT_COUNT"
+            echo "needs_build=true" >> $GITHUB_ENV
+          else
+            echo "No security vulnerabilities found."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Extract metadata
         if: env.needs_build == 'true'
         id: meta
