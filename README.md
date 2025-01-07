@@ -21,7 +21,7 @@ Contains:
   - A module that enables you to search and replace text in the response body before sending it to the client.
 
 Versions:
-Alpine <!--ALPINE_VERSION-->3.21.0<!--ALPINE_VERSION-->  
+Alpine <!--ALPINE_VERSION-->3.21.1<!--ALPINE_VERSION-->  
 NGINX <!--NGINX_VERSION-->1.27.3<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.13<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.10.0<!--OWASP_RULESET_VERSION-->  
