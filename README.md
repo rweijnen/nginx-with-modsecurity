@@ -23,7 +23,7 @@ Contains:
 Versions:
 Alpine <!--ALPINE_VERSION-->3.21.3<!--ALPINE_VERSION-->  
 NGINX <!--NGINX_VERSION-->1.27.4<!--NGINX_VERSION-->  
-ModSecurity <!--MODSECURITY_VERSION-->v3.0.13<!--MODSECURITY_VERSION-->  
+ModSecurity <!--MODSECURITY_VERSION-->v3.0.14<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.11.0<!--OWASP_RULESET_VERSION-->  
 
 Includes the following modules:
