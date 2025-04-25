@@ -22,7 +22,9 @@ RUN apk add --update --no-cache \
     geoip-dev \
     automake \
     autoconf \
-    libtool
+    libtool \
+    pkgconfig \
+    bash
 
 # Download NGINX source code
 ARG NGINX_VERSION
