@@ -122,6 +122,7 @@ jobs:
           build-args: |
             NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}
           sbom: true
+          no-cache: true
           
       - name: Generate SBOM
         if: env.needs_build == 'true'
