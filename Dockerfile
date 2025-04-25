@@ -8,7 +8,7 @@ FROM alpine:latest AS builder
 # Install build dependencies required for building NGINX and the modules, including ModSecurity dependencies
 RUN apk add --update --no-cache \
     build-base \
-    pcre pcre-dev \
+    pcre2-dev \
     zlib zlib-dev \
     openssl openssl-dev \
     wget \
