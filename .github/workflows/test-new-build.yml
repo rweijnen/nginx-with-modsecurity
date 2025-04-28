@@ -136,14 +136,19 @@ jobs:
             NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}
           sbom: true
           no-cache: true
-          
+
+      - name: Pull image for SBOM scan
+        if: env.needs_build == 'true'
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_DATETIME }}
+        
       - name: Generate SBOM
         if: env.needs_build == 'true'
+        continue-on-error: true
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ steps.meta.outputs.tags }}
-          format: 'cyclonedx-json'
-          output-file: 'sbom.cyclonedx.json'
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_DATETIME }}
+          format: cyclonedx-json
+          output-file: 'sbom.cyclonedx.json'          
                  
       - name: Attest SBOM
         if: env.needs_build == 'true'
