@@ -104,7 +104,8 @@ FROM alpine:latest
 # Install runtime dependencies
 RUN apk add --update --no-cache \
     libstdc++ \
-	pcre \
+    pcre \
+    pcre2 \ 
     libmaxminddb \
     openssl \
     libxml2 \
