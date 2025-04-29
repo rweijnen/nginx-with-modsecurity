@@ -167,6 +167,7 @@ jobs:
           echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_MODSECURITY_VERSION=${{ env.LATEST_MODSECURITY_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
+          echo "BUILD_TIMESTAMP=${{ env.BUILD_DATETIME }}" >> VERSIONS.txt
       
           # Update README.md with the new versions
           sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->${{ env.LATEST_ALPINE_VERSION }}<!--ALPINE_VERSION-->/g" README.md
