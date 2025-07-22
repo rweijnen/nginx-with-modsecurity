@@ -2,6 +2,12 @@ name: Build and Push Docker Image v2
 
 on:
   workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if no version changes'
+        required: false
+        default: false
+        type: boolean
   push:
     branches:
       - main
@@ -66,9 +72,53 @@ jobs:
       - name: Fetch Latest ModSecurity Version
         id: fetch_modsecurity_version
         run: |
-          LATEST_MODSECURITY_VERSION=$( curl -s https://api.github.com/repositories/1320594/releases | jq -r 'map(select(.tag_name | startswith("v3."))) | .[0].tag_name')
-          echo "Latest ModSecurity Release: $LATEST_MODSECURITY_VERSION" 
+          set -e
+          echo "Fetching ModSecurity releases..."
+          
+          # Install jq if not available (shouldn't be needed on ubuntu-latest but just in case)
+          if ! command -v jq &> /dev/null; then
+            echo "Installing jq..."
+            sudo apt-get update -qq
+            sudo apt-get install -y jq
+          fi
+          
+          # Fetch releases with retry logic
+          RELEASES_JSON=""
+          for i in {1..3}; do
+            echo "Attempt $i to fetch releases..."
+            RELEASES_JSON=$(curl -s --fail --max-time 30 https://api.github.com/repositories/1320594/releases)
+            if [ $? -eq 0 ] && [ -n "$RELEASES_JSON" ]; then
+              echo "Successfully fetched releases data"
+              break
+            fi
+            echo "Attempt $i failed, retrying in 5 seconds..."
+            sleep 5
+          done
+          
+          # Check if we got valid JSON
+          if [ -z "$RELEASES_JSON" ] || ! echo "$RELEASES_JSON" | jq empty 2>/dev/null; then
+            echo "Error: Failed to fetch valid releases JSON"
+            exit 1
+          fi
+          
+          # Extract latest v3 version with fallback
+          LATEST_MODSECURITY_VERSION=$(echo "$RELEASES_JSON" | jq -r 'map(select(.tag_name | startswith("v3."))) | .[0].tag_name // empty')
+          
+          # Validate we got a version
+          if [ -z "$LATEST_MODSECURITY_VERSION" ] || [ "$LATEST_MODSECURITY_VERSION" = "null" ]; then
+            echo "Error: No v3 ModSecurity releases found"
+            echo "Available releases:"
+            echo "$RELEASES_JSON" | jq -r '.[].tag_name' | head -10
+            exit 1
+          fi
+          
+          echo "Latest ModSecurity Release: $LATEST_MODSECURITY_VERSION"
           echo "LATEST_MODSECURITY_VERSION=$LATEST_MODSECURITY_VERSION" >> $GITHUB_ENV
+          
+          # Verify the version format
+          if [[ ! "$LATEST_MODSECURITY_VERSION" =~ ^v3\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Warning: Version format looks unexpected: $LATEST_MODSECURITY_VERSION"
+          fi
 
       - name: Fetch Latest OWASP Core Rule Set Version
         id: fetch_owasp_ruleset_version
@@ -80,11 +130,18 @@ jobs:
       - name: Compare versions
         id: compare_versions
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "Manual trigger detected. Forcing build."
+          # Check for manual force build
+          if [[ "${{ github.event.inputs.force_build }}" == "true" ]]; then
+            echo "Manual force build requested. Proceeding with build."
             echo "needs_build=true" >> $GITHUB_ENV
+            echo "build_reason=Manual force build" >> $GITHUB_ENV
             exit 0
-          fi        
+          fi
+
+          # Check for manual workflow dispatch (without force flag)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] && [[ "${{ github.event.inputs.force_build }}" != "true" ]]; then
+            echo "Manual trigger detected but force_build not set. Proceeding with normal version comparison."
+          fi
 
           source VERSIONS.txt
           
