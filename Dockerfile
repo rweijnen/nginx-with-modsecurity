@@ -87,10 +87,11 @@ RUN cd nginx-${NGINX_VERSION} && \
 #    mv coreruleset-3.3.0 /usr/local/coreruleset && \
 #    cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
 # Setup OWASP ModSecurity Core Rule Set
-RUN wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
+RUN TARBALL_URL=$(wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
     grep "tarball_url" | \
-    cut -d '"' -f 4 | \
-    xargs wget -O coreruleset.tar.gz && \
+    cut -d '"' -f 4) && \
+    echo "Downloading OWASP CRS from: $TARBALL_URL" && \
+    wget -O coreruleset.tar.gz "$TARBALL_URL" && \
     mkdir coreruleset && \
     tar -xzf coreruleset.tar.gz --strip-components=1 -C coreruleset && \
     mv coreruleset /usr/local/coreruleset && \
