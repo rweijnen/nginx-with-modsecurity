@@ -1,0 +1,158 @@
+# Add these steps to your test-new-build.yml workflow after the "Attest SBOM" step
+# Insert around line 160, before "Update versions file and README.md"
+
+      - name: Post-Build Vulnerability Scan
+        if: env.needs_build == 'true'
+        id: post-build-scan
+        continue-on-error: true  # Don't fail the entire workflow if scan fails
+        uses: docker/scout-action@v1
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_DATETIME }}
+          command: cves
+          sarif-file: post-build-sarif.output.json
+          summary: true
+          only-severities: critical,high
+          exit-code: false
+
+      - name: Analyze post-build vulnerabilities
+        if: env.needs_build == 'true'
+        id: analyze-post-build
+        continue-on-error: true
+        run: |
+          if [[ ! -f "post-build-sarif.output.json" ]]; then
+            echo "No post-build SARIF file generated"
+            echo "post_build_vulns=0" >> $GITHUB_OUTPUT
+            echo "scan_status=no_scan" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Count critical and high vulnerabilities in new image
+          CRITICAL_COUNT=$(jq '.runs[0].results | map(select(.properties.cvss_severity == "critical")) | length' post-build-sarif.output.json 2>/dev/null || echo "0")
+          HIGH_COUNT=$(jq '.runs[0].results | map(select(.properties.cvss_severity == "high")) | length' post-build-sarif.output.json 2>/dev/null || echo "0")
+          TOTAL_VULNS=$((CRITICAL_COUNT + HIGH_COUNT))
+
+          echo "Post-build scan results:"
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+          echo "Total critical/high vulnerabilities: $TOTAL_VULNS"
+
+          echo "post_build_vulns=$TOTAL_VULNS" >> $GITHUB_OUTPUT
+          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          echo "high_count=$HIGH_COUNT" >> $GITHUB_OUTPUT
+
+          if [[ $TOTAL_VULNS -gt 0 ]]; then
+            echo "scan_status=vulnerabilities_found" >> $GITHUB_OUTPUT
+            echo "⚠️ New image still contains $TOTAL_VULNS critical/high vulnerabilities"
+          else
+            echo "scan_status=clean" >> $GITHUB_OUTPUT
+            echo "✅ New image appears to be free of critical/high vulnerabilities"
+          fi
+
+      - name: Upload post-build SARIF to GitHub Security
+        if: env.needs_build == 'true' && steps.post-build-scan.outcome == 'success'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: post-build-sarif.output.json
+
+      - name: Upload post-build vulnerability report
+        if: env.needs_build == 'true' && steps.post-build-scan.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-build-vulnerability-scan-${{ env.BUILD_DATETIME }}
+          path: post-build-sarif.output.json
+
+      - name: Create vulnerability comparison report
+        if: env.needs_build == 'true' && steps.analyze-post-build.outcome == 'success'
+        run: |
+          echo "## 🔍 Post-Build Vulnerability Report" > post-build-report.md
+          echo "" >> post-build-report.md
+          echo "**Build Date:** ${{ env.BUILD_DATETIME }}" >> post-build-report.md
+          echo "**Image:** ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_DATETIME }}" >> post-build-report.md
+          echo "**Critical Vulnerabilities:** ${{ steps.analyze-post-build.outputs.critical_count }}" >> post-build-report.md
+          echo "**High Vulnerabilities:** ${{ steps.analyze-post-build.outputs.high_count }}" >> post-build-report.md
+          echo "**Total Critical/High:** ${{ steps.analyze-post-build.outputs.post_build_vulns }}" >> post-build-report.md
+          echo "**Status:** ${{ steps.analyze-post-build.outputs.scan_status }}" >> post-build-report.md
+          echo "" >> post-build-report.md
+          
+          case "${{ steps.analyze-post-build.outputs.scan_status }}" in
+            "clean")
+              echo "✅ **Result:** New image is clean of critical/high severity vulnerabilities." >> post-build-report.md
+              ;;
+            "vulnerabilities_found")
+              echo "⚠️ **Result:** New image still contains vulnerabilities that may require attention." >> post-build-report.md
+              echo "" >> post-build-report.md
+              echo "**Recommendation:** Review the detailed SARIF report and consider:" >> post-build-report.md
+              echo "- Updating base Alpine image" >> post-build-report.md  
+              echo "- Updating component versions (NGINX, ModSecurity, etc.)" >> post-build-report.md
+              echo "- Checking for available security patches" >> post-build-report.md
+              ;;
+            "no_scan")
+              echo "ℹ️ **Result:** Vulnerability scan could not be completed." >> post-build-report.md
+              ;;
+          esac
+
+      - name: Upload vulnerability comparison report
+        if: env.needs_build == 'true' && steps.analyze-post-build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-build-vulnerability-report-${{ env.BUILD_DATETIME }}
+          path: post-build-report.md
+
+      # Update the existing "Update versions file and README.md" step to include vulnerability info
+      - name: Update versions file and README.md
+        if: env.needs_build == 'true' && success() && steps.compare_versions.outcome == 'success'
+        run: |
+          # Update VERSIONS.txt
+          echo "CURRENT_ALPINE_VERSION=${{ env.LATEST_ALPINE_VERSION }}" > VERSIONS.txt
+          echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" >> VERSIONS.txt
+          echo "CURRENT_MODSECURITY_VERSION=${{ env.LATEST_MODSECURITY_VERSION }}" >> VERSIONS.txt
+          echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
+          echo "BUILD_TIMESTAMP=${{ env.BUILD_DATETIME }}" >> VERSIONS.txt
+      
+          # Add vulnerability scan info if available
+          if [[ "${{ steps.analyze-post-build.outcome }}" == "success" ]]; then
+            echo "LAST_VULN_SCAN_DATE=$(date -u '+%Y-%m-%d')" >> VERSIONS.txt
+            echo "LAST_VULN_COUNT=${{ steps.analyze-post-build.outputs.post_build_vulns }}" >> VERSIONS.txt
+          fi
+      
+          # Update README.md with the new versions
+          sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->${{ env.LATEST_ALPINE_VERSION }}<!--ALPINE_VERSION-->/g" README.md
+          sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.LATEST_NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
+          sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.LATEST_MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
+          sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.LATEST_OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
+      
+          # Configure Git
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git pull origin main
+
+          # Create commit message with vulnerability info
+          COMMIT_MSG="Update versions and README.md: NGINX ${{ env.LATEST_NGINX_VERSION }}, ModSecurity ${{ env.LATEST_MODSECURITY_VERSION }}, OWASP CRS ${{ env.LATEST_OWASP_RULESET_VERSION }}"
+          
+          # Add vulnerability context to commit message for loop prevention
+          if [[ "${{ github.event.inputs.force_build }}" == "true" ]]; then
+            if [[ "${{ github.workflow }}" == *"vulnerability"* ]] || [[ "${{ github.run_id }}" == *"vulnerability"* ]]; then
+              COMMIT_MSG="$COMMIT_MSG [vulnerability-rebuild]"
+            else
+              COMMIT_MSG="$COMMIT_MSG [manual-rebuild]"
+            fi
+          fi
+          
+          if [[ "${{ steps.analyze-post-build.outcome }}" == "success" ]]; then
+            VULN_COUNT="${{ steps.analyze-post-build.outputs.post_build_vulns }}"
+            if [[ "$VULN_COUNT" == "0" ]]; then
+              COMMIT_MSG="$COMMIT_MSG [vuln-scan: clean]"
+            else
+              COMMIT_MSG="$COMMIT_MSG [vuln-scan: $VULN_COUNT critical/high]"
+            fi
+          fi
+
+          # Add files and commit the changes
+          git add VERSIONS.txt README.md
+          git commit -m "$COMMIT_MSG"
+
+          # Push the changes
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
