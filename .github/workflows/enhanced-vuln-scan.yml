@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
   schedule:
-    - cron: '30 6 * * *'  # Run daily at 6:30 AM UTC (different from build schedule)
+    - cron: '30 6 * * *'
 
 permissions:
   contents: write
