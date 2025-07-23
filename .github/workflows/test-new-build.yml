@@ -27,6 +27,7 @@ jobs:
       packages: write
       contents: write
       attestations: write
+      security-events: write
     environment: DEFAULT     
     env:
       REGISTRY: index.docker.io
