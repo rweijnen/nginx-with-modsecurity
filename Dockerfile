@@ -87,8 +87,17 @@ RUN cd nginx-${NGINX_VERSION} && \
 #    mv coreruleset-3.3.0 /usr/local/coreruleset && \
 #    cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
 # Setup OWASP ModSecurity Core Rule Set
-# Use specific version to avoid API dependency issues on ARM64 platforms
-RUN wget -O coreruleset.tar.gz "https://github.com/coreruleset/coreruleset/archive/refs/tags/v4.16.0.tar.gz" && \
+RUN TARBALL_URL=$(wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
+    grep "tarball_url" | \
+    cut -d '"' -f 4) && \
+    echo "Downloading OWASP CRS from: $TARBALL_URL" && \
+    if [ -z "$TARBALL_URL" ]; then \
+        echo "ERROR: Failed to get tarball URL from GitHub API, falling back to latest tag method" && \
+        LATEST_TAG=$(wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | grep '"tag_name"' | cut -d '"' -f 4) && \
+        TARBALL_URL="https://github.com/coreruleset/coreruleset/archive/refs/tags/$LATEST_TAG.tar.gz" && \
+        echo "Using fallback URL: $TARBALL_URL"; \
+    fi && \
+    wget -O coreruleset.tar.gz "$TARBALL_URL" && \
     mkdir coreruleset && \
     tar -xzf coreruleset.tar.gz --strip-components=1 -C coreruleset && \
     mv coreruleset /usr/local/coreruleset && \
