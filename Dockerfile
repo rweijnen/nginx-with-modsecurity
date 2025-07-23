@@ -87,15 +87,22 @@ RUN cd nginx-${NGINX_VERSION} && \
 #    mv coreruleset-3.3.0 /usr/local/coreruleset && \
 #    cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
 # Setup OWASP ModSecurity Core Rule Set
-RUN TARBALL_URL=$(wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
-    grep "tarball_url" | \
-    cut -d '"' -f 4) && \
-    echo "Downloading OWASP CRS from: $TARBALL_URL" && \
+RUN for i in 1 2 3; do \
+        echo "Attempt $i: Fetching OWASP CRS release info..." && \
+        TARBALL_URL=$(wget --timeout=30 --tries=3 -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
+            grep "tarball_url" | \
+            cut -d '"' -f 4) && \
+        if [ -n "$TARBALL_URL" ]; then \
+            echo "Successfully got tarball URL: $TARBALL_URL" && \
+            break; \
+        else \
+            echo "Attempt $i failed, retrying in 5 seconds..." && \
+            sleep 5; \
+        fi; \
+    done && \
     if [ -z "$TARBALL_URL" ]; then \
-        echo "ERROR: Failed to get tarball URL from GitHub API, falling back to latest tag method" && \
-        LATEST_TAG=$(wget -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | grep '"tag_name"' | cut -d '"' -f 4) && \
-        TARBALL_URL="https://github.com/coreruleset/coreruleset/archive/refs/tags/$LATEST_TAG.tar.gz" && \
-        echo "Using fallback URL: $TARBALL_URL"; \
+        echo "ERROR: All attempts to fetch tarball URL failed" && \
+        exit 1; \
     fi && \
     wget -O coreruleset.tar.gz "$TARBALL_URL" && \
     mkdir coreruleset && \
