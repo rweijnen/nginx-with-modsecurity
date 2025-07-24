@@ -27,7 +27,7 @@ ModSecurity <!--MODSECURITY_VERSION-->v3.0.14<!--MODSECURITY_VERSION-->
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.16.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2025-07-24 10:16 UTC<!--BUILD_DATE-->  
+Built: <!--BUILD_DATE-->2025-07-24 12:10 UTC<!--BUILD_DATE-->  
 Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
 Includes the following modules:
