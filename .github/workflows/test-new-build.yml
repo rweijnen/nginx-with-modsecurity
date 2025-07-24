@@ -161,16 +161,37 @@ jobs:
           echo "LATEST_MODSECURITY_VERSION='${{ env.LATEST_MODSECURITY_VERSION }}'"
           echo "LATEST_OWASP_RULESET_VERSION='${{ env.LATEST_OWASP_RULESET_VERSION }}'"
       
-          if [[ "${{ env.LATEST_NGINX_VERSION }}" == "$CURRENT_NGINX_VERSION" ]] && \
-               [[ "${{ env.LATEST_MODSECURITY_VERSION }}" == "$CURRENT_MODSECURITY_VERSION" ]] && \
-               [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" == "$CURRENT_OWASP_RULESET_VERSION" ]] && \
-               [[ "${{ env.LATEST_GEOIP2_VERSION }}" == "$CURRENT_GEOIP2_VERSION" ]] && \
-               [[ "${{ env.LATEST_ALPINE_VERSION }}" == "$CURRENT_ALPINE_VERSION" ]]; then
-             echo "No updates found. Exiting."
-             echo "needs_build=false" >> $GITHUB_ENV
+          # Detect specific version changes and build comprehensive reason
+          BUILD_REASONS=()
+          
+          if [[ "${{ env.LATEST_NGINX_VERSION }}" != "$CURRENT_NGINX_VERSION" ]]; then
+            BUILD_REASONS+=("NGINX updated from $CURRENT_NGINX_VERSION to ${{ env.LATEST_NGINX_VERSION }}")
+          fi
+          
+          if [[ "${{ env.LATEST_MODSECURITY_VERSION }}" != "$CURRENT_MODSECURITY_VERSION" ]]; then
+            BUILD_REASONS+=("ModSecurity updated from $CURRENT_MODSECURITY_VERSION to ${{ env.LATEST_MODSECURITY_VERSION }}")
+          fi
+          
+          if [[ "${{ env.LATEST_OWASP_RULESET_VERSION }}" != "$CURRENT_OWASP_RULESET_VERSION" ]]; then
+            BUILD_REASONS+=("OWASP CRS updated from $CURRENT_OWASP_RULESET_VERSION to ${{ env.LATEST_OWASP_RULESET_VERSION }}")
+          fi
+          
+          if [[ "${{ env.LATEST_ALPINE_VERSION }}" != "$CURRENT_ALPINE_VERSION" ]]; then
+            BUILD_REASONS+=("Alpine Linux updated from $CURRENT_ALPINE_VERSION to ${{ env.LATEST_ALPINE_VERSION }}")
+          fi
+          
+          # Check if any updates were found
+          if [[ ${#BUILD_REASONS[@]} -eq 0 ]]; then
+            echo "No updates found. Exiting."
+            echo "needs_build=false" >> $GITHUB_ENV
           else
             echo "New versions found. Proceeding with the build."
             echo "needs_build=true" >> $GITHUB_ENV
+            
+            # Create build reason summary
+            BUILD_REASON=$(IFS='; '; echo "${BUILD_REASONS[*]}")
+            echo "build_reason=$BUILD_REASON" >> $GITHUB_ENV
+            echo "Build reason: $BUILD_REASON"
           fi          
           
       - name: Extract metadata
@@ -327,7 +348,8 @@ jobs:
           echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
           echo "BUILD_TIMESTAMP=${{ env.BUILD_DATETIME }}" >> VERSIONS.txt
           
-          # Add vulnerability scan info if available
+          # Add build reason and vulnerability scan info
+          echo "BUILD_REASON=${{ env.build_reason }}" >> VERSIONS.txt
           if [[ "${{ steps.analyze-post-build.outcome }}" == "success" ]]; then
             echo "LAST_VULN_SCAN_DATE=$(date -u '+%Y-%m-%d')" >> VERSIONS.txt
             echo "LAST_VULN_COUNT=${{ steps.analyze-post-build.outputs.post_build_vulns }}" >> VERSIONS.txt
@@ -338,6 +360,11 @@ jobs:
           sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.LATEST_NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
           sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.LATEST_MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
           sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.LATEST_OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
+          
+          # Update README.md with latest build information
+          BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M UTC')
+          sed -i "s/<!--BUILD_DATE-->.*<!--BUILD_DATE-->/<!--BUILD_DATE-->$BUILD_DATE<!--BUILD_DATE-->/g" README.md
+          sed -i "s/<!--BUILD_REASON-->.*<!--BUILD_REASON-->/<!--BUILD_REASON-->${{ env.build_reason }}<!--BUILD_REASON-->/g" README.md
       
           # Configure Git
           git config --local user.name "github-actions[bot]"
