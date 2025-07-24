@@ -1,5 +1,11 @@
 sbom.cyclonedx.json
 /.claude
 
+# Claude Code files
+CLAUDE.md
+claude.md
+.claude/
+claude_*
+
 # Batch files for local development
 *.bat
