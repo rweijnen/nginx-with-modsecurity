@@ -1,0 +1,7 @@
+# Ensure VERSIONS.txt uses Unix line endings in repository
+VERSIONS.txt eol=lf
+
+# Ensure shell scripts use Unix line endings
+*.sh eol=lf
+*.yml eol=lf
+*.yaml eol=lf
