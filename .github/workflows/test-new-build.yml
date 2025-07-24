@@ -87,12 +87,15 @@ jobs:
           RELEASES_JSON=""
           for i in {1..3}; do
             echo "Attempt $i to fetch releases..."
+            set +e  # Temporarily disable exit on error for curl
             RELEASES_JSON=$(curl -s --fail --max-time 30 https://api.github.com/repositories/1320594/releases)
-            if [ $? -eq 0 ] && [ -n "$RELEASES_JSON" ]; then
+            CURL_EXIT_CODE=$?
+            set -e  # Re-enable exit on error
+            if [ $CURL_EXIT_CODE -eq 0 ] && [ -n "$RELEASES_JSON" ]; then
               echo "Successfully fetched releases data"
               break
             fi
-            echo "Attempt $i failed, retrying in 5 seconds..."
+            echo "Attempt $i failed (exit code: $CURL_EXIT_CODE), retrying in 5 seconds..."
             sleep 5
           done
           
