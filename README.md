@@ -24,11 +24,11 @@ Versions:
 Alpine <!--ALPINE_VERSION-->3.22.1<!--ALPINE_VERSION-->  
 NGINX <!--NGINX_VERSION-->1.29.0<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.14<!--MODSECURITY_VERSION-->  
-OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.16.0<!--OWASP_RULESET_VERSION-->  
+OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.17.1<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2025-07-24 12:10 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2025-08-09 00:10 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->OWASP CRS updated from v4.16.0 to v4.17.1<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
