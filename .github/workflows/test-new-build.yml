@@ -349,7 +349,7 @@ jobs:
           echo "BUILD_TIMESTAMP=${{ env.BUILD_DATETIME }}" >> VERSIONS.txt
           
           # Add build reason and vulnerability scan info
-          echo "BUILD_REASON=${{ env.build_reason }}" >> VERSIONS.txt
+          echo "BUILD_REASON=\"${{ env.build_reason }}\"" >> VERSIONS.txt
           if [[ "${{ steps.analyze-post-build.outcome }}" == "success" ]]; then
             echo "LAST_VULN_SCAN_DATE=$(date -u '+%Y-%m-%d')" >> VERSIONS.txt
             echo "LAST_VULN_COUNT=${{ steps.analyze-post-build.outputs.post_build_vulns }}" >> VERSIONS.txt
