@@ -21,18 +21,18 @@ Contains:
   - A module that enables you to search and replace text in the response body before sending it to the client.
 
 Versions:
-Alpine <!--ALPINE_VERSION-->3.22.2<!--ALPINE_VERSION-->  
-NGINX <!--NGINX_VERSION-->1.29.3<!--NGINX_VERSION-->  
+Alpine <!--ALPINE_VERSION-->3.23.2<!--ALPINE_VERSION-->  
+NGINX <!--NGINX_VERSION-->1.29.4<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.14<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.21.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2025-12-02 23:57 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->OWASP CRS updated from v4.20.0 to v4.21.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2025-12-18 23:54 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.29.3 to 1.29.4;Alpine Linux updated from 3.22.2 to 3.23.2<!--BUILD_REASON-->
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2025-12-02 23:57 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->OWASP CRS updated from v4.20.0 to v4.21.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2025-12-18 23:54 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.29.3 to 1.29.4;Alpine Linux updated from 3.22.2 to 3.23.2<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
