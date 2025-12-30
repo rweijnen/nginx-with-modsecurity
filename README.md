@@ -43,7 +43,39 @@ Also changes the NGINX indentifiers which make it slightly harder to detect webs
 
 Images are on [DockerHub](https://hub.docker.com/r/rweijnen/nginx-with-modsecurity) and can be pulled with `docker pull rweijnen/nginx-with-modsecurity`.
 
-Example docker-compose:
+## ModSecurity Configuration
+
+### PCRE Limits
+The image sets increased PCRE limits to avoid `MSC_PCRE_LIMITS_EXCEEDED` errors:
+- `SecPcreMatchLimit 50000` (default: 1500)
+- `SecPcreMatchLimitRecursion 50000` (default: 1500)
+
+These values are recommended by CRS developers and suitable for most use cases.
+
+### Custom ModSecurity Overrides
+You can override any ModSecurity settings without rebuilding the image by mounting configuration files to `/etc/nginx/modsecurity/conf.d/`.
+
+1. Create a directory for your custom configs:
+   ```bash
+   mkdir -p /srv/nginx/modsecurity
+   ```
+
+2. Create a config file (e.g., `/srv/nginx/modsecurity/custom.conf`):
+   ```
+   # Example: Increase PCRE limits for high-traffic scenarios
+   SecPcreMatchLimit 250000
+   SecPcreMatchLimitRecursion 250000
+   ```
+
+3. Mount the directory in your docker-compose:
+   ```yaml
+   volumes:
+     - /srv/nginx/modsecurity:/etc/nginx/modsecurity/conf.d
+   ```
+
+Files in `conf.d/` are loaded after the main ModSecurity config, so your settings will override the defaults.
+
+## Example docker-compose
 ```version: '3.7'
 
 services:

@@ -154,12 +154,21 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 # Configure ModSecurity and CRS
 # Copy ModSecurity configuration files from the builder stage
 COPY --from=builder /ModSecurity/modsecurity.conf /etc/nginx/modsecurity/modsecurity.conf
-RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/g' /etc/nginx/modsecurity/modsecurity.conf
+RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/g' /etc/nginx/modsecurity/modsecurity.conf && \
+    echo "" >> /etc/nginx/modsecurity/modsecurity.conf && \
+    echo "# PCRE limits - increased from default 1500 to avoid MSC_PCRE_LIMITS_EXCEEDED errors" >> /etc/nginx/modsecurity/modsecurity.conf && \
+    echo "SecPcreMatchLimit 50000" >> /etc/nginx/modsecurity/modsecurity.conf && \
+    echo "SecPcreMatchLimitRecursion 50000" >> /etc/nginx/modsecurity/modsecurity.conf
+
+# Create conf.d directory for user overrides
+RUN mkdir -p /etc/nginx/modsecurity/conf.d
 
 RUN	touch /etc/nginx/modsecurity/main.conf && \
     echo "Include /etc/nginx/modsecurity/modsecurity.conf" > /etc/nginx/modsecurity/main.conf && \
     echo "Include /etc/nginx/modsecurity/coreruleset/crs-setup.conf" >> /etc/nginx/modsecurity/main.conf && \
-    echo "Include /etc/nginx/modsecurity/coreruleset/rules/*.conf" >> /etc/nginx/modsecurity/main.conf
+    echo "Include /etc/nginx/modsecurity/coreruleset/rules/*.conf" >> /etc/nginx/modsecurity/main.conf && \
+    echo "# Include custom overrides (mount your .conf files to /etc/nginx/modsecurity/conf.d/)" >> /etc/nginx/modsecurity/main.conf && \
+    echo "IncludeOptional /etc/nginx/modsecurity/conf.d/*.conf" >> /etc/nginx/modsecurity/main.conf
 
 # Create necessary directories
 RUN mkdir -p /etc/nginx/conf.d /var/log/nginx /var/cache/nginx /var/run/nginx /usr/lib/nginx/modules
