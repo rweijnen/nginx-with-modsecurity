@@ -160,15 +160,17 @@ RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/g' /etc/nginx/modsecu
     echo "SecPcreMatchLimit 50000" >> /etc/nginx/modsecurity/modsecurity.conf && \
     echo "SecPcreMatchLimitRecursion 50000" >> /etc/nginx/modsecurity/modsecurity.conf
 
-# Create conf.d directory for user overrides
-RUN mkdir -p /etc/nginx/modsecurity/conf.d
+# Create conf.d directory for user overrides with empty placeholder
+# (ModSecurity doesn't support IncludeOptional, so we need a file to exist)
+RUN mkdir -p /etc/nginx/modsecurity/conf.d && \
+    echo "# Place custom ModSecurity overrides here" > /etc/nginx/modsecurity/conf.d/00-placeholder.conf
 
 RUN	touch /etc/nginx/modsecurity/main.conf && \
     echo "Include /etc/nginx/modsecurity/modsecurity.conf" > /etc/nginx/modsecurity/main.conf && \
     echo "Include /etc/nginx/modsecurity/coreruleset/crs-setup.conf" >> /etc/nginx/modsecurity/main.conf && \
     echo "Include /etc/nginx/modsecurity/coreruleset/rules/*.conf" >> /etc/nginx/modsecurity/main.conf && \
     echo "# Include custom overrides (mount your .conf files to /etc/nginx/modsecurity/conf.d/)" >> /etc/nginx/modsecurity/main.conf && \
-    echo "IncludeOptional /etc/nginx/modsecurity/conf.d/*.conf" >> /etc/nginx/modsecurity/main.conf
+    echo "Include /etc/nginx/modsecurity/conf.d/*.conf" >> /etc/nginx/modsecurity/main.conf
 
 # Create necessary directories
 RUN mkdir -p /etc/nginx/conf.d /var/log/nginx /var/cache/nginx /var/run/nginx /usr/lib/nginx/modules
