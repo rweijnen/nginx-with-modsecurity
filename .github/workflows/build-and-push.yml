@@ -369,8 +369,6 @@ jobs:
           # Configure Git
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git pull origin main
 
           # Create commit message with vulnerability info
           COMMIT_MSG="Update versions and README.md: NGINX ${{ env.LATEST_NGINX_VERSION }}, ModSecurity ${{ env.LATEST_MODSECURITY_VERSION }}, OWASP CRS ${{ env.LATEST_OWASP_RULESET_VERSION }}"
@@ -397,7 +395,8 @@ jobs:
           git add VERSIONS.txt README.md
           git commit -m "$COMMIT_MSG"
 
-          # Push the changes
+          # Pull any changes that happened during the build, then push
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
