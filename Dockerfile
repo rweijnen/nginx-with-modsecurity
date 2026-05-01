@@ -45,8 +45,7 @@ RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module 
 
 # Build ModSecurity
 RUN cd ModSecurity && \
-    git submodule init && \
-    git submodule update && \
+    git submodule update --init --recursive && \
     ./build.sh && \
     ./configure && \
     make && \
