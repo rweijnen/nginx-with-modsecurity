@@ -341,34 +341,32 @@ jobs:
       - name: Update versions file and README.md
         if: env.needs_build == 'true' && success() && steps.compare_versions.outcome == 'success'
         run: |
-          # Update VERSIONS.txt
+          # Configure Git
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Reset to latest origin/main before making changes to avoid rebase conflicts
+          git fetch origin
+          git reset --hard origin/main
+
+          # Re-apply version updates after reset
           echo "CURRENT_ALPINE_VERSION=${{ env.LATEST_ALPINE_VERSION }}" > VERSIONS.txt
           echo "CURRENT_NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_MODSECURITY_VERSION=${{ env.LATEST_MODSECURITY_VERSION }}" >> VERSIONS.txt
           echo "CURRENT_OWASP_RULESET_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}" >> VERSIONS.txt
           echo "BUILD_TIMESTAMP=${{ env.BUILD_DATETIME }}" >> VERSIONS.txt
-          
-          # Add build reason and vulnerability scan info
           echo "BUILD_REASON=\"${{ env.build_reason }}\"" >> VERSIONS.txt
           if [[ "${{ steps.analyze-post-build.outcome }}" == "success" ]]; then
             echo "LAST_VULN_SCAN_DATE=$(date -u '+%Y-%m-%d')" >> VERSIONS.txt
             echo "LAST_VULN_COUNT=${{ steps.analyze-post-build.outputs.post_build_vulns }}" >> VERSIONS.txt
           fi
-      
-          # Update README.md with the new versions
           sed -i "s/<!--ALPINE_VERSION-->.*<!--ALPINE_VERSION-->/<!--ALPINE_VERSION-->${{ env.LATEST_ALPINE_VERSION }}<!--ALPINE_VERSION-->/g" README.md
           sed -i "s/<!--NGINX_VERSION-->.*<!--NGINX_VERSION-->/<!--NGINX_VERSION-->${{ env.LATEST_NGINX_VERSION }}<!--NGINX_VERSION-->/g" README.md
           sed -i "s/<!--MODSECURITY_VERSION-->.*<!--MODSECURITY_VERSION-->/<!--MODSECURITY_VERSION-->${{ env.LATEST_MODSECURITY_VERSION }}<!--MODSECURITY_VERSION-->/g" README.md
           sed -i "s/<!--OWASP_RULESET_VERSION-->.*<!--OWASP_RULESET_VERSION-->/<!--OWASP_RULESET_VERSION-->${{ env.LATEST_OWASP_RULESET_VERSION }}<!--OWASP_RULESET_VERSION-->/g" README.md
-          
-          # Update README.md with latest build information
           BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M UTC')
           sed -i "s/<!--BUILD_DATE-->.*<!--BUILD_DATE-->/<!--BUILD_DATE-->$BUILD_DATE<!--BUILD_DATE-->/g" README.md
           sed -i "s/<!--BUILD_REASON-->.*<!--BUILD_REASON-->/<!--BUILD_REASON-->${{ env.build_reason }}<!--BUILD_REASON-->/g" README.md
-      
-          # Configure Git
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
 
           # Create commit message with vulnerability info
           COMMIT_MSG="Update versions and README.md: NGINX ${{ env.LATEST_NGINX_VERSION }}, ModSecurity ${{ env.LATEST_MODSECURITY_VERSION }}, OWASP CRS ${{ env.LATEST_OWASP_RULESET_VERSION }}"
@@ -394,9 +392,6 @@ jobs:
           # Add files and commit the changes
           git add VERSIONS.txt README.md
           git commit -m "$COMMIT_MSG"
-
-          # Pull any changes that happened during the build, then push
-          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
