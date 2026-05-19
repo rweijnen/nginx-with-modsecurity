@@ -27,12 +27,12 @@ ModSecurity <!--MODSECURITY_VERSION-->v3.0.15<!--MODSECURITY_VERSION-->
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.26.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-05-16 11:31 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->NGINX updated from 1.29.8 to 1.31.0;ModSecurity updated from v3.0.14 to v3.0.15;OWASP CRS updated from v4.25.0 to v4.26.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-05-19 10:34 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-05-16 11:31 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->NGINX updated from 1.29.8 to 1.31.0;ModSecurity updated from v3.0.14 to v3.0.15;OWASP CRS updated from v4.25.0 to v4.26.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-05-19 10:34 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
