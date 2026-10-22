@@ -21,18 +21,18 @@ Contains:
   - A module that enables you to search and replace text in the response body before sending it to the client.
 
 Versions:
-Alpine <!--ALPINE_VERSION-->3.24.2<!--ALPINE_VERSION-->  
-NGINX <!--NGINX_VERSION-->1.31.7<!--NGINX_VERSION-->  
+Alpine <!--ALPINE_VERSION-->3.24.3<!--ALPINE_VERSION-->  
+NGINX <!--NGINX_VERSION-->1.31.8<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.17<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.30.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-10-15 01:48 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->NGINX updated from 1.31.6 to 1.31.7<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-10-22 02:37 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.31.7 to 1.31.8;Alpine Linux updated from 3.24.2 to 3.24.3<!--BUILD_REASON-->
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-10-15 01:48 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->NGINX updated from 1.31.6 to 1.31.7<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-10-22 02:37 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.31.7 to 1.31.8;Alpine Linux updated from 3.24.2 to 3.24.3<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
