@@ -72,6 +72,8 @@ jobs:
           
       - name: Fetch Latest ModSecurity Version
         id: fetch_modsecurity_version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           echo "Fetching ModSecurity releases..."
@@ -88,14 +90,16 @@ jobs:
           for i in {1..3}; do
             echo "Attempt $i to fetch releases..."
             set +e  # Temporarily disable exit on error for curl
-            RELEASES_JSON=$(curl -s --fail --max-time 30 https://api.github.com/repositories/1320594/releases)
+            HTTP_CODE=$(curl -s --max-time 30 -H "Authorization: Bearer $GH_TOKEN" -o "$RUNNER_TEMP/modsec-releases.json" -w '%{http_code}' https://api.github.com/repositories/1320594/releases)
             CURL_EXIT_CODE=$?
             set -e  # Re-enable exit on error
-            if [ $CURL_EXIT_CODE -eq 0 ] && [ -n "$RELEASES_JSON" ]; then
+            if [ $CURL_EXIT_CODE -eq 0 ] && [ "$HTTP_CODE" = "200" ]; then
+              RELEASES_JSON=$(cat "$RUNNER_TEMP/modsec-releases.json")
               echo "Successfully fetched releases data"
               break
             fi
-            echo "Attempt $i failed (exit code: $CURL_EXIT_CODE), retrying in 5 seconds..."
+            echo "Attempt $i failed (curl exit code: $CURL_EXIT_CODE, HTTP status: $HTTP_CODE), retrying in 5 seconds..."
+            cat "$RUNNER_TEMP/modsec-releases.json" 2>/dev/null || true
             sleep 5
           done
           
@@ -126,8 +130,20 @@ jobs:
 
       - name: Fetch Latest OWASP Core Rule Set Version
         id: fetch_owasp_ruleset_version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LATEST_OWASP_RULESET_VERSION=$(curl -s https://api.github.com/repos/coreruleset/coreruleset/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+          HTTP_CODE=$(curl -s --max-time 30 -H "Authorization: Bearer $GH_TOKEN" -o "$RUNNER_TEMP/crs-latest.json" -w '%{http_code}' https://api.github.com/repos/coreruleset/coreruleset/releases/latest)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: Failed to fetch OWASP CRS latest release (HTTP status: $HTTP_CODE)"
+            cat "$RUNNER_TEMP/crs-latest.json" 2>/dev/null || true
+            exit 1
+          fi
+          LATEST_OWASP_RULESET_VERSION=$(jq -r '.tag_name // empty' "$RUNNER_TEMP/crs-latest.json")
+          if [ -z "$LATEST_OWASP_RULESET_VERSION" ]; then
+            echo "Error: No tag_name in OWASP CRS latest release response"
+            exit 1
+          fi
           echo "Latest OWASP Core Ruleset Release: $LATEST_OWASP_RULESET_VERSION"
           echo "LATEST_OWASP_RULESET_VERSION=$LATEST_OWASP_RULESET_VERSION" >> $GITHUB_ENV
             
