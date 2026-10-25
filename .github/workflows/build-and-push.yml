@@ -232,6 +232,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             NGINX_VERSION=${{ env.LATEST_NGINX_VERSION }}
+            CRS_VERSION=${{ env.LATEST_OWASP_RULESET_VERSION }}
           sbom: true
           no-cache: true
 

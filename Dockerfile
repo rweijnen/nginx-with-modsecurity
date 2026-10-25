@@ -85,25 +85,13 @@ RUN cd nginx-${NGINX_VERSION} && \
 #    tar -xzf v3.3.0.tar.gz && \
 #    mv coreruleset-3.3.0 /usr/local/coreruleset && \
 #    cp /usr/local/coreruleset/crs-setup.conf.example /usr/local/coreruleset/crs-setup.conf
-# Setup OWASP ModSecurity Core Rule Set
-RUN for i in 1 2 3; do \
-        echo "Attempt $i: Fetching OWASP CRS release info..." && \
-        TARBALL_URL=$(wget --timeout=30 --tries=3 -qO- "https://api.github.com/repos/coreruleset/coreruleset/releases/latest" | \
-            grep "tarball_url" | \
-            cut -d '"' -f 4) && \
-        if [ -n "$TARBALL_URL" ]; then \
-            echo "Successfully got tarball URL: $TARBALL_URL" && \
-            break; \
-        else \
-            echo "Attempt $i failed, retrying in 5 seconds..." && \
-            sleep 5; \
-        fi; \
-    done && \
-    if [ -z "$TARBALL_URL" ]; then \
-        echo "ERROR: All attempts to fetch tarball URL failed" && \
+# Setup OWASP ModSecurity Core Rule Set (release tag, e.g. v4.30.0, passed in by the build workflow)
+ARG CRS_VERSION
+RUN if [ -z "$CRS_VERSION" ]; then \
+        echo "ERROR: CRS_VERSION build arg is required (e.g. --build-arg CRS_VERSION=v4.30.0)" && \
         exit 1; \
     fi && \
-    wget -O coreruleset.tar.gz "$TARBALL_URL" && \
+    wget --timeout=30 --tries=3 -O coreruleset.tar.gz "https://github.com/coreruleset/coreruleset/archive/refs/tags/${CRS_VERSION}.tar.gz" && \
     mkdir coreruleset && \
     tar -xzf coreruleset.tar.gz --strip-components=1 -C coreruleset && \
     mv coreruleset /usr/local/coreruleset && \
