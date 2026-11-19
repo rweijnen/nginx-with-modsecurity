@@ -22,17 +22,17 @@ Contains:
 
 Versions:
 Alpine <!--ALPINE_VERSION-->3.24.4<!--ALPINE_VERSION-->  
-NGINX <!--NGINX_VERSION-->1.31.8<!--NGINX_VERSION-->  
+NGINX <!--NGINX_VERSION-->1.31.9<!--NGINX_VERSION-->  
 ModSecurity <!--MODSECURITY_VERSION-->v3.0.17<!--MODSECURITY_VERSION-->  
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.30.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-11-06 04:06 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->Alpine Linux updated from 3.24.3 to 3.24.4<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-11-19 04:40 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.31.8 to 1.31.9<!--BUILD_REASON-->
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-11-06 04:06 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->Alpine Linux updated from 3.24.3 to 3.24.4<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-11-19 04:40 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->NGINX updated from 1.31.8 to 1.31.9<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
