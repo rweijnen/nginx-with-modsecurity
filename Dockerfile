@@ -1,6 +1,3 @@
-# Define the NGINX version to use for consistency in both stages
-ARG NGINX_VERSION=1.21.6
-
 # First stage: Build the ngx_http_subs_filter_module, ngx_http_geoip2_module, and ModSecurity
 #FROM --platform=linux/arm64/v8 alpine:latest AS builder
 FROM alpine:latest AS builder
@@ -11,7 +8,7 @@ RUN apk add --update --no-cache \
     pcre2 pcre2-dev \
     zlib zlib-dev \
     openssl openssl-dev \
-    wget \
+    wget gnupg \
     git \
     libmaxminddb-dev \
     libmaxminddb \
@@ -26,10 +23,18 @@ RUN apk add --update --no-cache \
     pkgconfig \
     bash
 
-# Download NGINX source code
+# Source release signer: Sergey Kandaurov (https://nginx.org/keys/pluknet.key)
+# Primary fingerprint: D6786CE303D9A9022998DC6CC8464D549AF75C0A
+COPY keys/nginx-pluknet.asc /tmp/nginx-pluknet.asc
 ARG NGINX_VERSION
-RUN wget http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
-    tar zxvf nginx-${NGINX_VERSION}.tar.gz
+RUN set -eu; \
+    : "${NGINX_VERSION:?Pass --build-arg NGINX_VERSION=<version>}"; \
+    archive="nginx-${NGINX_VERSION}.tar.gz"; \
+    wget -O "$archive" "https://nginx.org/download/$archive"; \
+    wget -O "$archive.asc" "https://nginx.org/download/$archive.asc"; \
+    gpg --batch --dearmor --output /tmp/nginx-release.gpg /tmp/nginx-pluknet.asc; \
+    gpgv --keyring /tmp/nginx-release.gpg "$archive.asc" "$archive"; \
+    tar -xzf "$archive"
 
 # Perform search and replace in ngx_http_special_response.c
 RUN sed -i 's|<hr><center>nginx</center>|<hr><center>Reynholm Industries</center>|g' nginx-${NGINX_VERSION}/src/http/ngx_http_special_response.c && \

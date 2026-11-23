@@ -66,7 +66,7 @@ jobs:
       - name: Fetch Latest NGINX Version
         id: fetch_nginx_version
         run: |
-          LATEST_NGINX_VERSION=$(wget -qO- http://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          LATEST_NGINX_VERSION=$(wget -qO- https://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
           echo "Latest NGINX version: $LATEST_NGINX_VERSION"
           echo "LATEST_NGINX_VERSION=$LATEST_NGINX_VERSION" >> $GITHUB_ENV
           
