@@ -3,7 +3,8 @@
 FROM alpine:latest AS builder
 
 # Install build dependencies required for building NGINX and the modules, including ModSecurity dependencies
-RUN apk add --update --no-cache \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache \
     build-base \
     pcre2 pcre2-dev \
     zlib zlib-dev \
@@ -108,7 +109,8 @@ RUN if [ -z "$CRS_VERSION" ]; then \
 FROM alpine:latest
 
 # Install runtime dependencies
-RUN apk add --update --no-cache \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache \
     libstdc++ \
     pcre \
     pcre2 \ 
