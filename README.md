@@ -27,12 +27,12 @@ ModSecurity <!--MODSECURITY_VERSION-->v3.0.17<!--MODSECURITY_VERSION-->
 OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.31.0<!--OWASP_RULESET_VERSION-->  
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-11-24 00:48 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->OWASP CRS updated from v4.30.0 to v4.31.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-11-24 01:32 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
 **Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-11-24 00:48 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->OWASP CRS updated from v4.30.0 to v4.31.0<!--BUILD_REASON-->
+Built: <!--BUILD_DATE-->2026-11-24 01:32 UTC<!--BUILD_DATE-->  
+Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
 Includes the following modules:
 GeoIP2
