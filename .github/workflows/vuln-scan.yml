@@ -41,23 +41,20 @@ jobs:
           docker pull ${{ env.IMAGE_NAME }}:latest
 
       - name: Scan for vulnerabilities
-        uses: docker/scout-action@v1
-        with:
-          image: ${{ env.IMAGE_NAME }}:latest
-          command: cves
-          sarif-file: sarif.output.json
-          summary: true
-          only-severities: critical,high
-          exit-code: false
+        id: scout
+        run: bash .github/scripts/scan-image.sh "$IMAGE_NAME:latest" sarif.output.json
+
+      - name: Summarize findings
+        run: python3 .github/scripts/count-scout-findings.py sarif.output.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload SARIF to GitHub Security
-        if: always()
+        if: always() && steps.scout.outcome == 'success'
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: sarif.output.json
 
       - name: Upload SARIF artifact
-        if: always()
+        if: always() && steps.scout.outcome == 'success'
         uses: actions/upload-artifact@v6
         with:
           name: vulnerability-sarif-${{ github.run_number }}

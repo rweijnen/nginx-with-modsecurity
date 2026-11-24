@@ -5,48 +5,13 @@
         if: env.needs_build == 'true'
         id: post-build-scan
         continue-on-error: true  # Don't fail the entire workflow if scan fails
-        uses: docker/scout-action@v1
-        with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.BUILD_DATETIME }}
-          command: cves
-          sarif-file: post-build-sarif.output.json
-          summary: true
-          only-severities: critical,high
-          exit-code: false
+        run: bash .github/scripts/scan-image.sh "$REGISTRY/$IMAGE_NAME:$BUILD_DATETIME" post-build-sarif.output.json
 
       - name: Analyze post-build vulnerabilities
-        if: env.needs_build == 'true'
+        if: env.needs_build == 'true' && steps.post-build-scan.outcome == 'success'
         id: analyze-post-build
         continue-on-error: true
-        run: |
-          if [[ ! -f "post-build-sarif.output.json" ]]; then
-            echo "No post-build SARIF file generated"
-            echo "post_build_vulns=0" >> $GITHUB_OUTPUT
-            echo "scan_status=no_scan" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Count critical and high vulnerabilities in new image
-          CRITICAL_COUNT=$(jq '.runs[0].results | map(select(.properties.cvss_severity == "critical")) | length' post-build-sarif.output.json 2>/dev/null || echo "0")
-          HIGH_COUNT=$(jq '.runs[0].results | map(select(.properties.cvss_severity == "high")) | length' post-build-sarif.output.json 2>/dev/null || echo "0")
-          TOTAL_VULNS=$((CRITICAL_COUNT + HIGH_COUNT))
-
-          echo "Post-build scan results:"
-          echo "Critical vulnerabilities: $CRITICAL_COUNT"
-          echo "High vulnerabilities: $HIGH_COUNT"
-          echo "Total critical/high vulnerabilities: $TOTAL_VULNS"
-
-          echo "post_build_vulns=$TOTAL_VULNS" >> $GITHUB_OUTPUT
-          echo "critical_count=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
-          echo "high_count=$HIGH_COUNT" >> $GITHUB_OUTPUT
-
-          if [[ $TOTAL_VULNS -gt 0 ]]; then
-            echo "scan_status=vulnerabilities_found" >> $GITHUB_OUTPUT
-            echo "⚠️ New image still contains $TOTAL_VULNS critical/high vulnerabilities"
-          else
-            echo "scan_status=clean" >> $GITHUB_OUTPUT
-            echo "✅ New image appears to be free of critical/high vulnerabilities"
-          fi
+        run: python3 .github/scripts/count-scout-findings.py post-build-sarif.output.json >> "$GITHUB_OUTPUT"
 
       - name: Upload post-build SARIF to GitHub Security
         if: env.needs_build == 'true' && steps.post-build-scan.outcome == 'success'
