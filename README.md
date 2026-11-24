@@ -30,10 +30,6 @@ OWASP RuleSet: <!--OWASP_RULESET_VERSION-->v4.31.0<!--OWASP_RULESET_VERSION-->
 Built: <!--BUILD_DATE-->2026-11-24 01:32 UTC<!--BUILD_DATE-->  
 Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
 
-**Latest Build Information:**  
-Built: <!--BUILD_DATE-->2026-11-24 01:32 UTC<!--BUILD_DATE-->  
-Reason: <!--BUILD_REASON-->Manual force build<!--BUILD_REASON-->
-
 Includes the following modules:
 GeoIP2
 Subs filter
